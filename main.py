@@ -174,7 +174,7 @@ class Ui_MainWindow(object):
         stack.append(root)
         val = self.lineEdit.text()
         Input_for_ast=val
-        temp_tokens = self.get_input(val)
+        temp_tokens = self.tokenize(val)
         temp_tokens.reverse()
         Input_to_match.append('$')
         for i in range(len(temp_tokens)):
@@ -276,7 +276,7 @@ class Ui_MainWindow(object):
         if flag_is_accepted:
             tree = nx.DiGraph()
             nodes = []
-            text = self.get_input(text)
+            text = self.tokenize(text)
             labels = dict()
             for index, element in enumerate(text): labels[index] = [element, element]
             for index in range(0, len(text)): nodes.append(index)
@@ -291,7 +291,7 @@ class Ui_MainWindow(object):
                     if verbose: print(labels)
                     pos = self.hierarchy_pos(tree)
                     nx.draw_networkx(tree, pos=pos, labels=act_labels,node_size=[len(act_labels[node]) * 300 for node in list(tree.nodes)], node_color= "Yellow")
-                    plt.get_current_fig_manager().set_window_title("Abstract Syntax Tree Visualizer")
+                    plt.get_current_fig_manager().set_window_title("Syntax Tree")
                     plt.tight_layout()
                     plt.show()
                     break
@@ -310,37 +310,6 @@ class Ui_MainWindow(object):
                         break
                 if flag: continue
                 flag = False
-                for index in range(0, len(nodes)):
-                    if labels[nodes[index]][0] == "&&":
-                        left = nodes[index - 1]
-                        right = nodes[index + 1]
-                        parent = max(nodes) + 1
-                        labels[parent] = [labels[left][1] + " && " + labels[right][1], "&&"]
-                        tree.add_edge(parent, left)
-                        tree.add_edge(parent, right)
-                        nodes.pop(index - 1)
-                        nodes.pop(index - 1)
-                        nodes.pop(index - 1)
-                        nodes.insert(index - 1, parent)
-                        flag = True
-                        break
-                if flag: continue
-                flag = False
-                for index in range(0, len(nodes)):
-                    if labels[nodes[index]][0] == "||":
-                        left = nodes[index - 1]
-                        right = nodes[index + 1]
-                        parent = max(nodes) + 1
-                        labels[parent] = [labels[left][1] + " || " + labels[right][1], "||"]
-                        tree.add_edge(parent, left)
-                        tree.add_edge(parent, right)
-                        nodes.pop(index - 1)
-                        nodes.pop(index - 1)
-                        nodes.pop(index - 1)
-                        nodes.insert(index - 1, parent)
-                        flag = True
-                        break
-                if flag: continue
                 for index in range(0, len(nodes)):
                     if labels[nodes[index]][0] == ">":
                         left = nodes[index - 1]
@@ -378,6 +347,39 @@ class Ui_MainWindow(object):
                         nodes.pop(index - 1)
                         nodes.insert(index - 1, parent)
                         break
+                if flag: continue
+                flag = False
+
+                for index in range(0, len(nodes)):
+                    if labels[nodes[index]][0] == "&&":
+                        left = nodes[index - 1]
+                        right = nodes[index + 1]
+                        parent = max(nodes) + 1
+                        labels[parent] = [labels[left][1] + " && " + labels[right][1], "&&"]
+                        tree.add_edge(parent, left)
+                        tree.add_edge(parent, right)
+                        nodes.pop(index - 1)
+                        nodes.pop(index - 1)
+                        nodes.pop(index - 1)
+                        nodes.insert(index - 1, parent)
+                        flag = True
+                        break
+                if flag: continue
+                for index in range(0, len(nodes)):
+                    if labels[nodes[index]][0] == "||":
+                        left = nodes[index - 1]
+                        right = nodes[index + 1]
+                        parent = max(nodes) + 1
+                        labels[parent] = [labels[left][1] + " || " + labels[right][1], "||"]
+                        tree.add_edge(parent, left)
+                        tree.add_edge(parent, right)
+                        nodes.pop(index - 1)
+                        nodes.pop(index - 1)
+                        nodes.pop(index - 1)
+                        nodes.insert(index - 1, parent)
+                        break
+
+
         else:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
@@ -387,7 +389,7 @@ class Ui_MainWindow(object):
             msg.exec_()
 
 
-    def get_input(self,input):
+    def tokenize(self, input):
         global token_error
         token_error= False
         current = 0
